@@ -1,0 +1,8 @@
+.next/
+node_modules/
+coverage/
+drizzle/meta/
+package-lock.json
+sdd/
+AGENTS.md
+CLAUDE.md

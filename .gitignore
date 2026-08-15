@@ -1,0 +1,46 @@
+# Dependencies
+/node_modules/
+/.pnp
+.pnp.*
+
+# Tests
+/coverage/
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build/
+
+# Local environment files (keep the documented template)
+.env*
+!.env.example
+
+# Vercel
+/.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Certificates and keys
+*.pem
+
+# Private operational documentation
+/sdd/
+/AGENTS.md
+/CLAUDE.md
