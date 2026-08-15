@@ -1,0 +1,49 @@
+name: radarinvest-ai
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      context: .
+      target: tools
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["sh", "-c", "npm run db:migrate && npm run db:seed"]
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      SEED_ENABLED: "false"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
