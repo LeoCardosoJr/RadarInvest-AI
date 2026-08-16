@@ -33,7 +33,7 @@ publica os artefatos de produção. O deploy automático da integração Git par
 `main` fica desabilitado em `vercel.json`, evitando publicação antes da
 migration; previews das demais branches continuam habilitados.
 
-O ambiente `production` do GitHub Actions precisa dos secrets `VERCEL_TOKEN`,
+O GitHub Actions precisa do secret `VERCEL_TOKEN` e das variables
 `VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`. A `DATABASE_URL` permanece cadastrada na
 Vercel e é injetada temporariamente pela CLI, sem ser copiada para o GitHub.
 
