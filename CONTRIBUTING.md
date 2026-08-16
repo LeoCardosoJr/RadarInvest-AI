@@ -28,14 +28,18 @@ do merge. As mesmas verificações proporcionais à mudança devem ser executada
 localmente antes da abertura do PR.
 
 Após um merge na `main`, o mesmo workflow valida novamente o commit, aplica as
-migrations usando as variáveis do ambiente Production da Vercel e só então
-publica os artefatos de produção. O deploy automático da integração Git para a
-`main` fica desabilitado em `vercel.json`, evitando publicação antes da
-migration; previews das demais branches continuam habilitados.
+migrations com uma conexão dedicada e só então solicita o build e o deploy
+remotos à Vercel. O deploy automático da integração Git para a `main` fica
+desabilitado em `vercel.json`, evitando publicação antes da migration; previews
+das demais branches continuam habilitados.
 
-O GitHub Actions precisa do secret `VERCEL_TOKEN` e das variables
-`VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`. A `DATABASE_URL` permanece cadastrada na
-Vercel e é injetada temporariamente pela CLI, sem ser copiada para o GitHub.
+O GitHub Actions precisa dos secrets `VERCEL_TOKEN` e
+`MIGRATION_DATABASE_URL`, além das variables `VERCEL_ORG_ID` e
+`VERCEL_PROJECT_ID`. `MIGRATION_DATABASE_URL` usa o Session pooler do Supabase
+e fica restrita ao step de migration. A `DATABASE_URL` da aplicação permanece
+Sensitive na Vercel e usa o Transaction pooler; o build remoto consegue usá-la
+sem exportá-la para o runner do GitHub. O `VERCEL_TOKEN` também fica restrito ao
+step de deploy.
 
 ## Branches
 

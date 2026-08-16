@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseDatabaseEnv, parseSeedEnv, parseServerEnv } from "./env-schema";
+import { parseDatabaseEnv, parseMigrationEnv, parseSeedEnv, parseServerEnv } from "./env-schema";
 
 const requiredServerEnv = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/radarinvest",
@@ -10,6 +10,47 @@ const requiredServerEnv = {
 describe("parseDatabaseEnv", () => {
   it("requires an explicit database URL", () => {
     expect(() => parseDatabaseEnv({})).toThrow();
+  });
+});
+
+describe("parseMigrationEnv", () => {
+  it("uses the application database URL as the local fallback", () => {
+    expect(parseMigrationEnv(requiredServerEnv).DATABASE_URL).toBe(requiredServerEnv.DATABASE_URL);
+  });
+
+  it("prefers the dedicated migration database URL", () => {
+    const migrationDatabaseUrl = "postgresql://migration:password@localhost:5432/radarinvest";
+
+    expect(
+      parseMigrationEnv({
+        ...requiredServerEnv,
+        MIGRATION_DATABASE_URL: migrationDatabaseUrl,
+      }).DATABASE_URL,
+    ).toBe(migrationDatabaseUrl);
+  });
+
+  it("ignores an empty optional migration URL from the local env file", () => {
+    expect(
+      parseMigrationEnv({
+        ...requiredServerEnv,
+        MIGRATION_DATABASE_URL: "",
+      }).DATABASE_URL,
+    ).toBe(requiredServerEnv.DATABASE_URL);
+  });
+
+  it("rejects an invalid dedicated migration URL instead of hiding it", () => {
+    expect(() =>
+      parseMigrationEnv({
+        ...requiredServerEnv,
+        MIGRATION_DATABASE_URL: "not-a-url",
+      }),
+    ).toThrow();
+  });
+
+  it("requires at least one database URL", () => {
+    expect(() => parseMigrationEnv({})).toThrow(
+      /MIGRATION_DATABASE_URL or DATABASE_URL is required/,
+    );
   });
 });
 
