@@ -12,6 +12,31 @@
 8. Aguarde revisão e checks antes do merge.
 9. Após o merge, confirme o fechamento da issue e o status do card.
 
+## Validações automáticas
+
+Todo pull request direcionado à `main` executa o workflow de CI com PostgreSQL
+descartável. O check instala as dependências, aplica as migrations e executa:
+
+- `npm run format:check`;
+- `npm run lint`;
+- `npm run typecheck`;
+- `npm run test`, incluindo as integrações PostgreSQL;
+- `npm run build`.
+
+O check da Vercel Preview permanece separado. Ambos devem estar verdes antes
+do merge. As mesmas verificações proporcionais à mudança devem ser executadas
+localmente antes da abertura do PR.
+
+Após um merge na `main`, o mesmo workflow valida novamente o commit, aplica as
+migrations usando as variáveis do ambiente Production da Vercel e só então
+publica os artefatos de produção. O deploy automático da integração Git para a
+`main` fica desabilitado em `vercel.json`, evitando publicação antes da
+migration; previews das demais branches continuam habilitados.
+
+O ambiente `production` do GitHub Actions precisa dos secrets `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` e `VERCEL_PROJECT_ID`. A `DATABASE_URL` permanece cadastrada na
+Vercel e é injetada temporariamente pela CLI, sem ser copiada para o GitHub.
+
 ## Branches
 
 Formato:
