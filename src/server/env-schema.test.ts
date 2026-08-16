@@ -59,6 +59,15 @@ describe("parseSeedEnv", () => {
     ).toThrow(/SEED_USER_PASSWORD is required/);
   });
 
+  it("normalizes the configured seed email", () => {
+    const env = parseSeedEnv({
+      DATABASE_URL: requiredServerEnv.DATABASE_URL,
+      SEED_USER_EMAIL: " Demo@RadarInvest.Local ",
+    });
+
+    expect(env.SEED_USER_EMAIL).toBe("demo@radarinvest.local");
+  });
+
   it("rejects an enabled seed in production", () => {
     expect(() =>
       parseSeedEnv({

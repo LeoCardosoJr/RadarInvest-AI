@@ -4,6 +4,8 @@ const nodeEnvSchema = z.enum(["development", "test", "production"]).default("dev
 
 const databaseUrlSchema = z.url({ protocol: /^postgres(ql)?$/ });
 
+const normalizedEmailSchema = z.string().trim().toLowerCase().pipe(z.email());
+
 const booleanStringSchema = z
   .enum(["true", "false"])
   .default("false")
@@ -53,7 +55,7 @@ export const seedEnvSchema = z
 
     SEED_ENABLED: booleanStringSchema,
     SEED_USER_NAME: z.string().trim().min(1).default("Usuário Demo"),
-    SEED_USER_EMAIL: z.email().default("demo@radarinvest.local"),
+    SEED_USER_EMAIL: normalizedEmailSchema.default("demo@radarinvest.local"),
     SEED_USER_PASSWORD: z.string().min(8).optional(),
     SEED_USER_INTERESTS: z.string().default("PETR4,VALE3,taxa Selic"),
   })

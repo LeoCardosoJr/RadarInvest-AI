@@ -1,11 +1,27 @@
 import "dotenv/config";
 
+import { hash } from "bcryptjs";
+
 import { parseSeedEnv } from "../env-schema";
+import { createDatabase } from "./client";
+import { seedDatabase } from "./seed-service";
 
-const env = parseSeedEnv(process.env);
+async function main(): Promise<void> {
+  const env = parseSeedEnv(process.env);
+  const { client, db } = createDatabase(env.DATABASE_URL);
 
-if (!env.SEED_ENABLED) {
-  console.info("Seed disabled; nothing to do.");
-} else {
-  console.info("Seed schema will be introduced in implementation stage 2.");
+  try {
+    await seedDatabase(env, {
+      db,
+      hashPassword: hash,
+      logger: console,
+    });
+  } finally {
+    await client.end();
+  }
 }
+
+void main().catch((error: unknown) => {
+  console.error("Database seed failed.", error);
+  process.exit(1);
+});

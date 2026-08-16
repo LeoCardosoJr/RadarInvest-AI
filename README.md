@@ -27,7 +27,15 @@ Para preparar o ambiente por containers, copie `.env.example` para `.env`, troqu
 docker compose up --build
 ```
 
-O schema e o seed funcionais serão adicionados na Etapa 2. Até lá, o scaffold pode ser validado diretamente com os scripts abaixo.
+O Compose aguarda o PostgreSQL ficar saudável, aplica as migrations versionadas, executa o seed local e só então inicia a aplicação. O seed é controlado por `SEED_ENABLED`, é bloqueado em produção e nunca sobrescreve nome ou senha de um usuário demo existente.
+
+As operações de banco também estão disponíveis separadamente para ambientes com `DATABASE_URL` acessível:
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+```
 
 ## Verificações
 
@@ -37,8 +45,17 @@ npm run lint
 npm run typecheck
 npm run test
 npm run test:coverage
+npm run test:integration:db
 npm run build
 ```
+
+O teste de integração exige um PostgreSQL migrado cujo nome termine em `_test`; fora desse ambiente, ele é ignorado com segurança pela suíte padrão.
+
+## Build e deploy
+
+O `npm run build` produz o build padrão do Next, usado no desenvolvimento local e na Vercel, que faz o próprio rastreamento de arquivos.
+
+O `output: "standalone"` é ativado apenas pela variável de build `NEXT_OUTPUT_STANDALONE=true`, definida no stage `builder` do `Dockerfile`, porque só a imagem Docker executa `node server.js`. Habilitá-la na Vercel quebra o build com `ENOENT ... next-server.js.nft.json`.
 
 ## Estrutura do backend
 

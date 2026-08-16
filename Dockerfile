@@ -12,6 +12,8 @@ FROM dependencies AS tools
 COPY . .
 
 FROM tools AS builder
+# Somente esta imagem consome o output standalone; a Vercel faz o próprio tracing.
+ENV NEXT_OUTPUT_STANDALONE=true
 RUN npm run build
 
 FROM base AS runner
