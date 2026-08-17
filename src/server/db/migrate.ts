@@ -7,13 +7,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 
-import { parseDatabaseEnv } from "../env-schema";
+import { parseMigrationEnv } from "../env-schema";
 
 const migrationsFolder = path.resolve(process.cwd(), "drizzle");
 const journalPath = path.join(migrationsFolder, "meta", "_journal.json");
 
 async function main(): Promise<void> {
-  const env = parseDatabaseEnv(process.env);
+  const env = parseMigrationEnv(process.env);
 
   if (!existsSync(journalPath)) {
     console.info("No migrations found; schema will be introduced in stage 2.");

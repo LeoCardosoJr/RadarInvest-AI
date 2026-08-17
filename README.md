@@ -57,6 +57,12 @@ O `npm run build` produz o build padrão do Next, usado no desenvolvimento local
 
 O `output: "standalone"` é ativado apenas pela variável de build `NEXT_OUTPUT_STANDALONE=true`, definida no stage `builder` do `Dockerfile`, porque só a imagem Docker executa `node server.js`. Habilitá-la na Vercel quebra o build com `ENOENT ... next-server.js.nft.json`.
 
+Em produção, `DATABASE_URL` permanece Sensitive na Vercel e aponta para o
+Transaction pooler apropriado ao runtime serverless. O GitHub Actions usa o
+secret separado `MIGRATION_DATABASE_URL`, com o Session pooler do Supabase,
+aplica as migrations antes do deploy e então solicita um build remoto à Vercel.
+Assim, os demais segredos não precisam ser exportados para o runner do GitHub.
+
 ## Estrutura do backend
 
 As rotas HTTP ficam em `src/app`. Regras e integrações ficam em `src/server`, separadas em módulos, portas, adapters e composition root. Os casos de uso não dependem de tipos HTTP, SDKs externos ou implementações concretas.

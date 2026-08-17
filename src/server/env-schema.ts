@@ -4,6 +4,11 @@ const nodeEnvSchema = z.enum(["development", "test", "production"]).default("dev
 
 const databaseUrlSchema = z.url({ protocol: /^postgres(ql)?$/ });
 
+const optionalDatabaseUrlSchema = z.union([
+  databaseUrlSchema,
+  z.literal("").transform(() => undefined),
+]);
+
 const normalizedEmailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
 const booleanStringSchema = z
@@ -19,6 +24,24 @@ const optionalNonEmptyString = z.union([
 export const databaseEnvSchema = z.object({
   DATABASE_URL: databaseUrlSchema,
 });
+
+export const migrationEnvSchema = z
+  .object({
+    DATABASE_URL: optionalDatabaseUrlSchema.optional(),
+    MIGRATION_DATABASE_URL: optionalDatabaseUrlSchema.optional(),
+  })
+  .superRefine((env, context) => {
+    if (!env.MIGRATION_DATABASE_URL && !env.DATABASE_URL) {
+      context.addIssue({
+        code: "custom",
+        path: ["MIGRATION_DATABASE_URL"],
+        message: "MIGRATION_DATABASE_URL or DATABASE_URL is required.",
+      });
+    }
+  })
+  .transform((env) => ({
+    DATABASE_URL: env.MIGRATION_DATABASE_URL ?? env.DATABASE_URL!,
+  }));
 
 export const serverEnvSchema = z.object({
   NODE_ENV: nodeEnvSchema,
@@ -84,6 +107,12 @@ export function parseDatabaseEnv(
   source: Record<string, string | undefined>,
 ): z.infer<typeof databaseEnvSchema> {
   return databaseEnvSchema.parse(source);
+}
+
+export function parseMigrationEnv(
+  source: Record<string, string | undefined>,
+): z.infer<typeof migrationEnvSchema> {
+  return migrationEnvSchema.parse(source);
 }
 
 export function parseServerEnv(source: Record<string, string | undefined>): ServerEnv {
