@@ -1,0 +1,578 @@
+openapi: 3.1.0
+info:
+  title: RadarInvest AI API
+  description: >
+    API do RadarInvest AI: cadastro e autenticação próprios, preferências de
+    interesse do usuário e feed diário de notícias financeiras resumido por
+    IA a partir dos interesses cadastrados.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+    description: Ambiente local (Docker Compose)
+
+security:
+  - bearerAuth: []
+  - sessionCookie: []
+
+tags:
+  - name: auth
+    description: Cadastro, login, sessão e recuperação de senha
+  - name: preferences
+    description: Interesses financeiros do usuário autenticado
+  - name: feed
+    description: Feed diário personalizado e cache
+
+paths:
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Cadastra um novo usuário
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Usuário criado; sessão iniciada
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie de sessão `radarinvest_session`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: E-mail já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: ACCOUNT_ALREADY_EXISTS
+                  message: Já existe uma conta para este e-mail.
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Autentica um usuário existente
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Autenticado; sessão iniciada
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie de sessão `radarinvest_session`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: E-mail ou senha inválidos (resposta idêntica em ambos os casos)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: E-mail ou senha inválidos.
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Encerra a sessão web
+      description: >
+        Remove o cookie de sessão. Um Bearer token já emitido permanece
+        válido até expirar.
+      responses:
+        "204":
+          description: Sessão encerrada
+
+  /auth/forgot-password:
+    post:
+      tags: [auth]
+      summary: Solicita a recuperação de senha
+      description: >
+        Responde sempre com o mesmo corpo e status, exista ou não uma conta
+        para o e-mail informado, para não revelar contas cadastradas.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "202":
+          description: Solicitação aceita (resposta uniforme)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: Se existir uma conta para este e-mail, enviaremos as instruções de recuperação.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/reset-password:
+    post:
+      tags: [auth]
+      summary: Conclui a recuperação de senha com o token recebido por e-mail
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Senha redefinida; nova sessão iniciada, sessões anteriores invalidadas
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie de sessão `radarinvest_session`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionResponse"
+        "400":
+          description: Token ausente, desconhecido, expirado, já usado ou dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                validation:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Dados inválidos.
+                invalidToken:
+                  value:
+                    error:
+                      code: INVALID_RESET_TOKEN
+                      message: Link de recuperação inválido ou expirado.
+
+  /preferences:
+    get:
+      tags: [preferences]
+      summary: Lista os interesses do usuário autenticado
+      responses:
+        "200":
+          description: Lista de interesses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreferencesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    put:
+      tags: [preferences]
+      summary: Substitui a coleção completa de interesses
+      description: >
+        Idempotente. Um conjunto efetivamente igual ao atual (ignorando
+        espaços, caixa e ordem) não gera escrita nem invalida o cache do
+        feed; qualquer mudança real invalida o cache do dia.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePreferencesRequest"
+      responses:
+        "200":
+          description: Coleção substituída
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreferencesResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /feed:
+    get:
+      tags: [feed]
+      summary: Retorna o feed diário do usuário autenticado
+      description: >
+        Reaproveita o cache do dia (fuso `America/Sao_Paulo`) quando o hash
+        dos interesses vigentes bate com o hash do cache; caso contrário,
+        gera o feed chamando o provedor de notícias e a IA. Sem interesses
+        cadastrados, retorna estado vazio com `generatedAt: null`.
+      responses:
+        "200":
+          description: Feed atual (gerado ou reaproveitado do cache)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+              examples:
+                cacheMiss:
+                  summary: Cache miss, gerado agora
+                  value:
+                    generatedAt: "2026-08-18T16:18:21.680Z"
+                    interests: ["PETR4", "taxa Selic", "VALE3"]
+                    items:
+                      - title: Vale lança plano para destravar mineração e gerar mais 2,3 mi de vagas no setor
+                        source: InfoMoney
+                        url: https://www.infomoney.com.br/mercados/vale-lanca-plano-para-destravar-mineracao-e-gerar-mais-23-mi-de-vagas-no-setor/
+                        summary: A Vale lançou o relatório "Destravando o Potencial da Mineração no Brasil", visando destravar a mineração e gerar mais 2,3 milhões de vagas no setor.
+                    cached: false
+                    stale: false
+                cacheHit:
+                  summary: Cache hit
+                  value:
+                    generatedAt: "2026-08-18T16:18:21.680Z"
+                    interests: ["PETR4", "taxa Selic", "VALE3"]
+                    items:
+                      - title: Vale lança plano para destravar mineração e gerar mais 2,3 mi de vagas no setor
+                        source: InfoMoney
+                        url: https://www.infomoney.com.br/mercados/vale-lanca-plano-para-destravar-mineracao-e-gerar-mais-23-mi-de-vagas-no-setor/
+                        summary: A Vale lançou o relatório "Destravando o Potencial da Mineração no Brasil", visando destravar a mineração e gerar mais 2,3 milhões de vagas no setor.
+                    cached: true
+                    stale: false
+                semPreferencias:
+                  summary: Sem interesses cadastrados
+                  value:
+                    generatedAt: null
+                    interests: []
+                    items: []
+                    cached: false
+                    stale: false
+                    message: Adicione interesses para receber seu feed diário.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: Fonte de notícias indisponível e sem cache compatível para fallback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: NEWS_UNAVAILABLE
+                  message: Fonte de notícias temporariamente indisponível.
+        "503":
+          description: IA indisponível ou resposta inválida, sem cache compatível para fallback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                unavailable:
+                  value:
+                    error:
+                      code: AI_UNAVAILABLE
+                      message: Provedor de IA temporariamente indisponível.
+                invalidResponse:
+                  value:
+                    error:
+                      code: AI_INVALID_RESPONSE
+                      message: Resposta da IA em formato inválido.
+
+  /feed/refresh:
+    post:
+      tags: [feed]
+      summary: Força a geração de um novo feed para hoje
+      description: >
+        Sempre regenera, mesmo com cache válido do dia. Sujeito a cooldown
+        contado a partir da última geração persistida (sem estado em
+        memória do processo). Se a regeneração falhar mas houver cache do
+        dia com o mesmo hash de interesses, retorna esse cache como stale
+        em vez de erro.
+      responses:
+        "200":
+          description: Novo feed gerado, ou fallback stale do cache existente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedResponse"
+              examples:
+                gerado:
+                  summary: Nova geração bem-sucedida
+                  value:
+                    generatedAt: "2026-08-18T16:20:00.000Z"
+                    interests: ["PETR4", "taxa Selic", "VALE3"]
+                    items: []
+                    cached: false
+                    stale: false
+                stale:
+                  summary: Regeneração falhou, fallback do cache compatível
+                  value:
+                    generatedAt: "2026-08-18T16:18:21.680Z"
+                    interests: ["PETR4", "taxa Selic", "VALE3"]
+                    items: []
+                    cached: true
+                    stale: true
+                    warning: Não foi possível atualizar o feed agora; exibindo a última versão gerada com sucesso.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          description: Refresh solicitado antes do cooldown configurado expirar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: FEED_REFRESH_COOLDOWN
+                  message: Aguarde antes de atualizar o feed novamente.
+                  details:
+                    retryAfterSeconds: "60"
+        "502":
+          description: Fonte de notícias indisponível e sem cache compatível para fallback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: NEWS_UNAVAILABLE
+                  message: Fonte de notícias temporariamente indisponível.
+        "503":
+          description: IA indisponível ou resposta inválida, sem cache compatível para fallback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: AI_UNAVAILABLE
+                  message: Provedor de IA temporariamente indisponível.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: radarinvest_session
+
+  responses:
+    ValidationError:
+      description: Corpo da requisição inválido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: Dados inválidos.
+              details:
+                field: email
+    Unauthorized:
+      description: JWT ausente, inválido, expirado ou com sessão revogada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: Autenticação obrigatória.
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, email]
+
+    SessionResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        accessToken:
+          type: string
+          description: JWT assinado; também disponível via cookie de sessão.
+        expiresAt:
+          type: string
+          format: date-time
+      required: [user, accessToken, expiresAt]
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        email:
+          type: string
+          format: email
+          maxLength: 320
+        password:
+          type: string
+          minLength: 8
+          description: Máximo de 72 bytes UTF-8 (limite efetivo do bcrypt).
+      required: [name, email, password]
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required: [email]
+
+    ResetPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token opaco recebido por e-mail; uso único.
+        password:
+          type: string
+          minLength: 8
+      required: [token, password]
+
+    Preference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        topic:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, topic, createdAt]
+
+    PreferencesResponse:
+      type: object
+      properties:
+        interests:
+          type: array
+          items:
+            $ref: "#/components/schemas/Preference"
+      required: [interests]
+
+    UpdatePreferencesRequest:
+      type: object
+      properties:
+        topics:
+          type: array
+          maxItems: 20
+          items:
+            type: string
+            maxLength: 80
+      required: [topics]
+
+    FeedItem:
+      type: object
+      properties:
+        title:
+          type: string
+        source:
+          type: string
+        url:
+          type: string
+          format: uri
+        summary:
+          type: string
+      required: [title, source, url, summary]
+
+    FeedResponse:
+      type: object
+      properties:
+        generatedAt:
+          type: [string, "null"]
+          format: date-time
+        interests:
+          type: array
+          items:
+            type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedItem"
+        cached:
+          type: boolean
+        stale:
+          type: boolean
+        message:
+          type: string
+          description: Presente só no estado vazio (sem interesses cadastrados).
+        warning:
+          type: string
+          description: Presente só no fallback stale de um refresh que falhou.
+      required: [generatedAt, interests, items, cached, stale]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum:
+                - VALIDATION_ERROR
+                - INVALID_RESET_TOKEN
+                - UNAUTHORIZED
+                - INVALID_CREDENTIALS
+                - ACCOUNT_ALREADY_EXISTS
+                - FEED_REFRESH_COOLDOWN
+                - NEWS_UNAVAILABLE
+                - AI_UNAVAILABLE
+                - AI_INVALID_RESPONSE
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties:
+                type: string
+              description: Opcional; sempre seguro para exposição ao cliente.
+          required: [code, message]
+      required: [error]
