@@ -37,7 +37,7 @@ export function DashboardView({ user, initialPreferences, initialFeed }: Dashboa
         cached: false,
         stale: false,
         message:
-          "Nenhum interesse cadastrado. Adicione tópicos acima para gerar seu resumo diário.",
+          "Nenhum interesse cadastrado. Adicione tópicos acima para gerar seu resumo de notícias.",
       });
       return;
     }
@@ -57,7 +57,7 @@ export function DashboardView({ user, initialPreferences, initialFeed }: Dashboa
         <p className="mt-2 text-sm text-slate-400">{user.email}</p>
         <p className="mt-4 text-sm leading-6 text-slate-300">
           Gerencie abaixo os interesses e tópicos financeiros que guiarão a curadoria e os resumos
-          diários de notícias gerados por IA.
+          de notícias gerados por IA.
         </p>
       </section>
 

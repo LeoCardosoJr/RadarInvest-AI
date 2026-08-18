@@ -123,7 +123,7 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-white">Seus Interesses</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Defina ativos, setores ou temas para personalizar seu resumo diário.
+            Defina ativos, setores ou temas para personalizar seu resumo de notícias.
           </p>
         </div>
         <span className="self-start rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-400 sm:self-auto">

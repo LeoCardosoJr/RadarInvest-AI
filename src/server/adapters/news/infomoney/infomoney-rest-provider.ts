@@ -1,26 +1,40 @@
 import { NewsUnavailableError } from "../../../errors/app-error";
 import type { NewsItem, NewsProvider } from "../../../ports/news-provider";
-import { parseInfoMoneyRss } from "./infomoney-rss-parser";
+import { parseInfoMoneyPosts } from "./infomoney-rest-parser";
 
-export interface InfoMoneyRssProviderConfig {
-  rssUrl: string;
+export interface InfoMoneyRestProviderConfig {
+  apiUrl: string;
   timeoutMs?: number;
   maxItems?: number;
   fetchFn?: typeof fetch;
 }
 
-export class InfoMoneyRssProvider implements NewsProvider {
+/**
+ * Consome a API pública (REST JSON) do WordPress que hospeda o InfoMoney. Não é um contrato
+ * publicado oficialmente pelo InfoMoney (ao contrário do RSS), então qualquer falha — HTTP,
+ * rede, timeout ou corpo inesperado — é normalizada para `NewsUnavailableError`.
+ */
+export class InfoMoneyRestProvider implements NewsProvider {
   readonly id = "infomoney";
-  private readonly rssUrl: string;
+  private readonly apiUrl: string;
   private readonly timeoutMs: number;
   private readonly maxItems: number;
   private readonly fetchFn: typeof fetch;
 
-  constructor(config: InfoMoneyRssProviderConfig) {
-    this.rssUrl = config.rssUrl;
+  constructor(config: InfoMoneyRestProviderConfig) {
+    this.apiUrl = config.apiUrl;
     this.timeoutMs = config.timeoutMs ?? 5_000;
     this.maxItems = config.maxItems ?? 20;
     this.fetchFn = config.fetchFn ?? globalThis.fetch;
+  }
+
+  private buildRequestUrl(): string {
+    const url = new URL(this.apiUrl);
+    url.searchParams.set("per_page", String(this.maxItems));
+    url.searchParams.set("_fields", "id,date_gmt,title,link,excerpt");
+    url.searchParams.set("orderby", "date");
+    url.searchParams.set("order", "desc");
+    return url.toString();
   }
 
   async fetchLatestNews(signal?: AbortSignal): Promise<NewsItem[]> {
@@ -28,11 +42,11 @@ export class InfoMoneyRssProvider implements NewsProvider {
     const combinedSignal = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
 
     try {
-      const response = await this.fetchFn(this.rssUrl, {
+      const response = await this.fetchFn(this.buildRequestUrl(), {
         signal: combinedSignal,
         headers: {
           "User-Agent": "RadarInvestAI/1.0",
-          Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+          Accept: "application/json",
         },
       });
 
@@ -42,8 +56,9 @@ export class InfoMoneyRssProvider implements NewsProvider {
         );
       }
 
-      const xml = await response.text();
-      return parseInfoMoneyRss(xml, {
+      const payload: unknown = await response.json();
+
+      return parseInfoMoneyPosts(payload, {
         sourceName: "InfoMoney",
         maxItems: this.maxItems,
       });

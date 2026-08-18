@@ -31,7 +31,7 @@ export interface FeedServiceConfig {
   readonly refreshCooldownSeconds: number;
 }
 
-const NO_PREFERENCES_MESSAGE = "Adicione interesses para receber seu feed diário.";
+const NO_PREFERENCES_MESSAGE = "Adicione interesses para receber seu feed personalizado.";
 const STALE_FALLBACK_WARNING =
   "Não foi possível atualizar o feed agora; exibindo a última versão gerada com sucesso.";
 

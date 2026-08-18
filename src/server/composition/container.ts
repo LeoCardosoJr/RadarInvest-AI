@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAiProvider } from "../adapters/ai/ai-provider-registry";
-import { InfoMoneyRssProvider } from "../adapters/news/infomoney/infomoney-rss-provider";
+import { InfoMoneyRestProvider } from "../adapters/news/infomoney/infomoney-rest-provider";
 import { NoopPasswordResetNotifier } from "../adapters/notifications/noop-password-reset-notifier";
 import { NodemailerMailTransport } from "../adapters/notifications/nodemailer-mail-transport";
 import { SmtpPasswordResetNotifier } from "../adapters/notifications/smtp-password-reset-notifier";
@@ -65,8 +65,8 @@ export function createContainer(env: ServerEnv): Container {
   const preferencesRepository = new DrizzlePreferencesRepository(db);
   const preferencesService = new PreferencesService(preferencesRepository);
   const feedCacheRepository = new DrizzleFeedCacheRepository(db);
-  const newsProvider = new InfoMoneyRssProvider({
-    rssUrl: env.INFOMONEY_RSS_URL,
+  const newsProvider = new InfoMoneyRestProvider({
+    apiUrl: env.INFOMONEY_API_URL,
     timeoutMs: env.NEWS_TIMEOUT_MS,
     maxItems: env.NEWS_MAX_ITEMS,
   });

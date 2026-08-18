@@ -1,6 +1,6 @@
 # RadarInvest AI
 
-Aplicação full-stack em Next.js para agregar notícias financeiras e produzir um feed diário resumido conforme os interesses de cada usuário.
+Aplicação full-stack em Next.js para agregar notícias financeiras e produzir um feed resumido conforme os interesses de cada usuário.
 
 ## Stack inicial
 
