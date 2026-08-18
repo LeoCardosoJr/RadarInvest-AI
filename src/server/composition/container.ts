@@ -1,5 +1,6 @@
 import "server-only";
 
+import { InfoMoneyRssProvider } from "../adapters/news/infomoney/infomoney-rss-provider";
 import { NoopPasswordResetNotifier } from "../adapters/notifications/noop-password-reset-notifier";
 import { NodemailerMailTransport } from "../adapters/notifications/nodemailer-mail-transport";
 import { SmtpPasswordResetNotifier } from "../adapters/notifications/smtp-password-reset-notifier";
@@ -14,11 +15,13 @@ import { createDatabase } from "../db/client";
 import { parseServerEnv, smtpConfigFromEnv, type ServerEnv } from "../env-schema";
 import { AuthService } from "../modules/auth/auth-service";
 import { PreferencesService } from "../modules/preferences/preferences-service";
+import type { NewsProvider } from "../ports/news-provider";
 import type { PasswordResetNotifier } from "../ports/password-reset-notifier";
 
 export interface Container {
   authService: AuthService;
   preferencesService: PreferencesService;
+  newsProvider: NewsProvider;
   authentication: AuthenticationDependencies;
   sessionCookie: { secure: boolean; maxAgeSeconds: number };
 }
@@ -53,6 +56,11 @@ export function createContainer(env: ServerEnv): Container {
   const userRepository = new DrizzleUserRepository(db);
   const preferencesRepository = new DrizzlePreferencesRepository(db);
   const preferencesService = new PreferencesService(preferencesRepository);
+  const newsProvider = new InfoMoneyRssProvider({
+    rssUrl: env.INFOMONEY_RSS_URL,
+    timeoutMs: env.NEWS_TIMEOUT_MS,
+    maxItems: env.NEWS_MAX_ITEMS,
+  });
   const jwtService = new JoseJwtService({
     secret: env.JWT_SECRET,
     issuer: env.JWT_ISSUER,
@@ -75,6 +83,7 @@ export function createContainer(env: ServerEnv): Container {
   return {
     authService,
     preferencesService,
+    newsProvider,
     authentication: { jwtService, userRepository },
     sessionCookie: {
       secure: env.NODE_ENV === "production",
