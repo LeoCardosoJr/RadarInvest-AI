@@ -40,7 +40,7 @@ describe("Feed components", () => {
         <FeedSection feed={sampleFeed} onFeedChange={vi.fn()} preferencesCount={1} />,
       );
 
-      expect(html).toContain("Seu Feed Diário");
+      expect(html).toContain("Seu Feed");
       expect(html).toContain("Em cache");
       expect(html).toContain("Petrobras anuncia dividendos extraordinários");
       expect(html).toContain("Aviso:");

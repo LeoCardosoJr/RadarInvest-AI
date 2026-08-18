@@ -88,7 +88,7 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 id="feed-heading" className="text-xl font-semibold tracking-tight text-white">
-              Seu Feed Diário
+              Seu Feed
             </h2>
             {feed.cached && !feed.stale && (
               <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-0.5 text-xs font-medium text-slate-400">
@@ -107,7 +107,7 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
             </p>
           ) : (
             <p className="mt-1 text-sm text-slate-400">
-              Resumo diário inteligente das notícias do mercado.
+              Resumo inteligente das últimas notícias do mercado.
             </p>
           )}
         </div>
