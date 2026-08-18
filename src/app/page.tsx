@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl items-center px-6 py-16">
@@ -12,9 +14,22 @@ export default function Home() {
           Acompanhe notícias financeiras relevantes em um feed diário, filtrado e resumido por
           inteligência artificial.
         </p>
-        <p className="mt-10 text-sm text-slate-400">
-          Estrutura inicial pronta. Autenticação, preferências e feed serão adicionados nas próximas
-          etapas.
+        <div className="mt-10 flex flex-wrap gap-4">
+          <Link
+            href="/register"
+            className="rounded-lg bg-emerald-500 px-5 py-2.5 font-semibold text-slate-950 transition hover:bg-emerald-400"
+          >
+            Criar conta
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-lg border border-slate-700 px-5 py-2.5 font-semibold text-slate-200 transition hover:border-emerald-400 hover:text-emerald-300"
+          >
+            Entrar
+          </Link>
+        </div>
+        <p className="mt-8 text-sm text-slate-400">
+          Autenticação disponível. Preferências e feed serão adicionados nas próximas etapas.
         </p>
       </section>
     </main>

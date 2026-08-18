@@ -1,4 +1,14 @@
-import { date, index, jsonb, pgTable, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  date,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  timestamp,
+  unique,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable(
   "users",
@@ -7,9 +17,31 @@ export const users = pgTable(
     name: varchar("name", { length: 120 }).notNull(),
     email: varchar("email", { length: 320 }).notNull(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+    // Incrementada a cada troca de senha para invalidar os JWTs emitidos antes.
+    tokenVersion: integer("token_version").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [unique("users_email_unique").on(table.email)],
+);
+
+export const passwordResetTokens = pgTable(
+  "password_reset_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // Somente o hash SHA-256 do token opaco é persistido.
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("password_reset_tokens_token_hash_unique").on(table.tokenHash),
+    index("password_reset_tokens_user_id_idx").on(table.userId),
+    index("password_reset_tokens_expires_at_idx").on(table.expiresAt),
+  ],
 );
 
 export const preferences = pgTable(
@@ -49,6 +81,8 @@ export const feedCache = pgTable(
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export type Preference = typeof preferences.$inferSelect;
 export type NewPreference = typeof preferences.$inferInsert;
 export type FeedCache = typeof feedCache.$inferSelect;
