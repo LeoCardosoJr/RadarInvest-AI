@@ -90,12 +90,32 @@ export function createContainer(env: ServerEnv): Container {
   });
 
   let cachedAiProvider: AiProvider | undefined;
-  let cachedFeedService: FeedService | undefined;
 
   function resolveAiProvider(): AiProvider {
     cachedAiProvider ??= createAiProvider(env);
     return cachedAiProvider;
   }
+
+  // FeedService só precisa do Gemini nos caminhos que realmente chegam à IA
+  // (cache miss, refresh). Injetar `resolveAiProvider()` direto acoplaria a
+  // validação da configuração ao simples acesso a `feedService`, quebrando
+  // todo request de feed (mesmo estado vazio, cache hit ou cooldown) quando
+  // o Gemini não está configurado. Este proxy adia a resolução para o
+  // primeiro `summarize` de verdade.
+  const lazyAiProvider: AiProvider = {
+    get id() {
+      return resolveAiProvider().id;
+    },
+    summarize: (input, signal) => resolveAiProvider().summarize(input, signal),
+  };
+
+  const feedService = new FeedService(
+    lazyAiProvider,
+    newsProvider,
+    preferencesRepository,
+    feedCacheRepository,
+    { timeZone: env.FEED_TIMEZONE, refreshCooldownSeconds: env.FEED_REFRESH_COOLDOWN_SECONDS },
+  );
 
   return {
     authService,
@@ -104,16 +124,7 @@ export function createContainer(env: ServerEnv): Container {
     get aiProvider(): AiProvider {
       return resolveAiProvider();
     },
-    get feedService(): FeedService {
-      cachedFeedService ??= new FeedService(
-        resolveAiProvider(),
-        newsProvider,
-        preferencesRepository,
-        feedCacheRepository,
-        { timeZone: env.FEED_TIMEZONE, refreshCooldownSeconds: env.FEED_REFRESH_COOLDOWN_SECONDS },
-      );
-      return cachedFeedService;
-    },
+    feedService,
     authentication: { jwtService, userRepository },
     sessionCookie: {
       secure: env.NODE_ENV === "production",
