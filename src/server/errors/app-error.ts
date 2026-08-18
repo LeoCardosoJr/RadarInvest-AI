@@ -50,6 +50,14 @@ export class InvalidPasswordResetTokenError extends AppError {
   }
 }
 
+export class FeedRefreshCooldownError extends AppError {
+  constructor(retryAfterSeconds: number) {
+    super("FEED_REFRESH_COOLDOWN", 429, "Aguarde antes de atualizar o feed novamente.", {
+      details: { retryAfterSeconds: String(retryAfterSeconds) },
+    });
+  }
+}
+
 export class NewsUnavailableError extends AppError {
   constructor(message = "Fonte de notícias temporariamente indisponível.", cause?: unknown) {
     super("NEWS_UNAVAILABLE", 502, message, { cause });

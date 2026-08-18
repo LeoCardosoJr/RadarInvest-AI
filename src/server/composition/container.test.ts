@@ -37,4 +37,25 @@ describe("createContainer", () => {
     expect(first).toBeInstanceOf(GeminiProvider);
     expect(first).toBe(second);
   });
+
+  it("só valida a configuração do Gemini quando feedService é acessado", () => {
+    const env = parseServerEnv(requiredServerEnv);
+    const container = createContainer(env);
+
+    expect(() => container.feedService).toThrow(/GEMINI_API_KEY/);
+  });
+
+  it("memoiza o feedService resolvido entre acessos", () => {
+    const env = parseServerEnv({
+      ...requiredServerEnv,
+      GEMINI_API_KEY: "fake-api-key",
+      GEMINI_MODEL: "fake-model",
+    });
+    const container = createContainer(env);
+
+    const first = container.feedService;
+    const second = container.feedService;
+
+    expect(first).toBe(second);
+  });
 });
