@@ -1,5 +1,6 @@
 import "server-only";
 
+import { createAiProvider } from "../adapters/ai/ai-provider-registry";
 import { InfoMoneyRssProvider } from "../adapters/news/infomoney/infomoney-rss-provider";
 import { NoopPasswordResetNotifier } from "../adapters/notifications/noop-password-reset-notifier";
 import { NodemailerMailTransport } from "../adapters/notifications/nodemailer-mail-transport";
@@ -15,6 +16,7 @@ import { createDatabase } from "../db/client";
 import { parseServerEnv, smtpConfigFromEnv, type ServerEnv } from "../env-schema";
 import { AuthService } from "../modules/auth/auth-service";
 import { PreferencesService } from "../modules/preferences/preferences-service";
+import type { AiProvider } from "../ports/ai-provider";
 import type { NewsProvider } from "../ports/news-provider";
 import type { PasswordResetNotifier } from "../ports/password-reset-notifier";
 
@@ -22,6 +24,8 @@ export interface Container {
   authService: AuthService;
   preferencesService: PreferencesService;
   newsProvider: NewsProvider;
+  /** Construído no primeiro acesso: rotas que não usam IA continuam sem exigir Gemini. */
+  readonly aiProvider: AiProvider;
   authentication: AuthenticationDependencies;
   sessionCookie: { secure: boolean; maxAgeSeconds: number };
 }
@@ -80,10 +84,16 @@ export function createContainer(env: ServerEnv): Container {
     },
   });
 
+  let cachedAiProvider: AiProvider | undefined;
+
   return {
     authService,
     preferencesService,
     newsProvider,
+    get aiProvider(): AiProvider {
+      cachedAiProvider ??= createAiProvider(env);
+      return cachedAiProvider;
+    },
     authentication: { jwtService, userRepository },
     sessionCookie: {
       secure: env.NODE_ENV === "production",

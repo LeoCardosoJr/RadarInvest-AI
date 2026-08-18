@@ -56,6 +56,18 @@ export class NewsUnavailableError extends AppError {
   }
 }
 
+export class AiUnavailableError extends AppError {
+  constructor(message = "Provedor de IA temporariamente indisponível.", cause?: unknown) {
+    super("AI_UNAVAILABLE", 503, message, { cause });
+  }
+}
+
+export class AiInvalidResponseError extends AppError {
+  constructor(message = "Resposta da IA em formato inválido.", cause?: unknown) {
+    super("AI_INVALID_RESPONSE", 503, message, { cause });
+  }
+}
+
 export class InternalError extends AppError {
   constructor(cause?: unknown) {
     super("INTERNAL_ERROR", 500, "Não foi possível concluir a operação.", { cause });
