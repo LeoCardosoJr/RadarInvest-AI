@@ -37,4 +37,24 @@ describe("createContainer", () => {
     expect(first).toBeInstanceOf(GeminiProvider);
     expect(first).toBe(second);
   });
+
+  it("não exige configuração do Gemini apenas ao acessar feedService", () => {
+    // Regressão: feedService é usado por GET /feed e POST /feed/refresh mesmo
+    // em caminhos que nunca chegam à IA (sem preferências, cache hit,
+    // cooldown). Validar o Gemini só por acessar a propriedade quebraria
+    // esses caminhos sem GEMINI_API_KEY configurado.
+    const env = parseServerEnv(requiredServerEnv);
+    const container = createContainer(env);
+
+    expect(() => container.feedService).not.toThrow();
+    // O acesso acima não deve ter validado/consumido a config do Gemini.
+    expect(() => container.aiProvider).toThrow(/GEMINI_API_KEY/);
+  });
+
+  it("expõe sempre a mesma instância de feedService", () => {
+    const env = parseServerEnv(requiredServerEnv);
+    const container = createContainer(env);
+
+    expect(container.feedService).toBe(container.feedService);
+  });
 });
