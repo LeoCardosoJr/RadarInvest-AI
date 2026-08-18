@@ -50,6 +50,12 @@ export class InvalidPasswordResetTokenError extends AppError {
   }
 }
 
+export class NewsUnavailableError extends AppError {
+  constructor(message = "Fonte de notícias temporariamente indisponível.", cause?: unknown) {
+    super("NEWS_UNAVAILABLE", 502, message, { cause });
+  }
+}
+
 export class InternalError extends AppError {
   constructor(cause?: unknown) {
     super("INTERNAL_ERROR", 500, "Não foi possível concluir a operação.", { cause });
