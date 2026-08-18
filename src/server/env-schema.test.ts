@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { parseDatabaseEnv, parseMigrationEnv, parseSeedEnv, parseServerEnv } from "./env-schema";
+import {
+  parseDatabaseEnv,
+  parseMigrationEnv,
+  parseSeedEnv,
+  parseServerEnv,
+  smtpConfigFromEnv,
+} from "./env-schema";
 
 const requiredServerEnv = {
   DATABASE_URL: "postgresql://user:password@localhost:5432/radarinvest",
@@ -79,6 +85,44 @@ describe("parseServerEnv", () => {
 
     expect(env.GEMINI_API_KEY).toBeUndefined();
     expect(env.GEMINI_MODEL).toBeUndefined();
+  });
+
+  it("uses the noop notifier configuration when every SMTP field is absent", () => {
+    expect(smtpConfigFromEnv(parseServerEnv(requiredServerEnv))).toBeNull();
+  });
+
+  it("rejects SMTP credentials without the required delivery fields", () => {
+    expect(() =>
+      parseServerEnv({
+        ...requiredServerEnv,
+        SMTP_USER: "smtp-user",
+        SMTP_PASSWORD: "smtp-password",
+      }),
+    ).toThrow(/SMTP_HOST is required/);
+  });
+
+  it("returns one normalized SMTP configuration when every required field exists", () => {
+    const config = smtpConfigFromEnv(
+      parseServerEnv({
+        ...requiredServerEnv,
+        APP_URL: "https://radarinvest.example",
+        SMTP_HOST: "smtp.example.com",
+        SMTP_PORT: "587",
+        SMTP_USER: "smtp-user",
+        SMTP_PASSWORD: "smtp-password",
+        PASSWORD_RESET_FROM_EMAIL: " Reset@Example.COM ",
+      }),
+    );
+
+    expect(config).toEqual({
+      host: "smtp.example.com",
+      port: 587,
+      secure: false,
+      user: "smtp-user",
+      password: "smtp-password",
+      fromEmail: "reset@example.com",
+      appUrl: "https://radarinvest.example",
+    });
   });
 });
 
