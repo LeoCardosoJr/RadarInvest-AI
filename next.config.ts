@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   // O SDK do Gemini usa requires dinâmicos que o tracing padrão do output
   // "standalone" não segue; sem isto, `@google/genai` fica de fora do
   // `node_modules` da imagem e todo request à IA falha com AI_UNAVAILABLE.
-  serverExternalPackages: ["@google/genai"],
+  serverExternalPackages: ["@google/genai", "ws"],
 };
 
 export default nextConfig;
