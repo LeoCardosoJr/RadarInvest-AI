@@ -1,89 +1,94 @@
-export const VALID_INFOMONEY_RSS_XML = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
-    <title>InfoMoney</title>
-    <link>https://www.infomoney.com.br</link>
-    <description>Mercados, Empresas, Política e Economia</description>
-    <language>pt-BR</language>
-    <item>
-      <title><![CDATA[Petrobras (PETR4) anuncia dividendos bilionários após resultado trimestral]]></title>
-      <link>https://www.infomoney.com.br/mercados/petrobras-petr4-anuncia-dividendos-bilionarios/</link>
-      <guid isPermaLink="true">https://www.infomoney.com.br/mercados/petrobras-petr4-anuncia-dividendos-bilionarios/</guid>
-      <description><![CDATA[<p>Conselho de administração da <strong>Petrobras</strong> aprovou o pagamento de R$ 1,20 por ação ordinária e preferencial.</p>]]></description>
-      <pubDate>Tue, 18 Aug 2026 10:30:00 -0300</pubDate>
-      <dc:creator><![CDATA[Redação InfoMoney]]></dc:creator>
-    </item>
-    <item>
-      <title>Copom indica Selic est&aacute;vel e mercado &ldquo;recalibra&rdquo; proje&ccedil;&otilde;es de juros</title>
-      <link>https://www.infomoney.com.br/economia/copom-indica-selic-estavel-e-mercado-recalibra-projecoes/</link>
-      <guid isPermaLink="true">https://www.infomoney.com.br/economia/copom-indica-selic-estavel-e-mercado-recalibra-projecoes/</guid>
-      <description>Ata do Banco Central refor&ccedil;ou cautela no cen&aacute;rio externo e press&otilde;es inflacion&aacute;rias dom&eacute;sticas.</description>
-      <pubDate>Tue, 18 Aug 2026 09:15:00 -0300</pubDate>
-    </item>
-    <item>
-      <title><![CDATA[Vale (VALE3) avança com alta do minério de ferro em Dalian]]></title>
-      <link>https://www.infomoney.com.br/mercados/vale-vale3-avanca-com-alta-do-minerio/</link>
-      <description><![CDATA[<img src="https://www.infomoney.com.br/wp-content/uploads/vale.jpg" alt="Vale" /><p>Ações da mineradora acompanham o bom humor nos mercados asiáticos nesta terça-feira.</p>]]></description>
-      <pubDate>Tue, 18 Aug 2026 08:00:00 -0300</pubDate>
-    </item>
-  </channel>
-</rss>`;
+/** Payloads de `GET /wp-json/wp/v2/posts?_fields=id,date_gmt,title,link,excerpt` (formato real da API). */
 
-export const RSS_XML_WITH_DUPLICATES = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>InfoMoney Duplicatas</title>
-    <link>https://www.infomoney.com.br</link>
-    <item>
-      <title>Notícia 1</title>
-      <link>https://www.infomoney.com.br/mercados/noticia-1/</link>
-      <description>Primeira versão</description>
-      <pubDate>Tue, 18 Aug 2026 10:00:00 -0300</pubDate>
-    </item>
-    <item>
-      <title>Notícia 1 Repetida</title>
-      <link>https://www.infomoney.com.br/mercados/noticia-1/</link>
-      <description>Segunda versão da mesma URL</description>
-      <pubDate>Tue, 18 Aug 2026 10:05:00 -0300</pubDate>
-    </item>
-    <item>
-      <title>Notícia 2</title>
-      <link>https://www.infomoney.com.br/mercados/noticia-2/</link>
-      <description>Outra notícia distinta</description>
-      <pubDate>Tue, 18 Aug 2026 10:10:00 -0300</pubDate>
-    </item>
-  </channel>
-</rss>`;
+export const VALID_INFOMONEY_POSTS_JSON = [
+  {
+    id: 3455092,
+    date_gmt: "2026-08-18T13:30:00",
+    title: {
+      rendered: "Petrobras (PETR4) anuncia dividendos bilionários após resultado trimestral",
+    },
+    link: "https://www.infomoney.com.br/mercados/petrobras-petr4-anuncia-dividendos-bilionarios/",
+    excerpt: {
+      rendered:
+        "<p>Conselho de administração da <strong>Petrobras</strong> aprovou o pagamento de R$ 1,20 por ação ordinária e preferencial.</p>\n",
+    },
+  },
+  {
+    id: 3455093,
+    date_gmt: "2026-08-18T12:15:00",
+    title: {
+      rendered:
+        "Copom indica Selic est&aacute;vel e mercado &ldquo;recalibra&rdquo; proje&ccedil;&otilde;es de juros",
+    },
+    link: "https://www.infomoney.com.br/economia/copom-indica-selic-estavel-e-mercado-recalibra-projecoes/",
+    excerpt: {
+      rendered:
+        "Ata do Banco Central refor&ccedil;ou cautela no cen&aacute;rio externo e press&otilde;es inflacion&aacute;rias dom&eacute;sticas.",
+    },
+  },
+  {
+    id: 3455094,
+    date_gmt: "2026-08-18T11:00:00",
+    title: { rendered: "Vale (VALE3) avança com alta do minério de ferro em Dalian" },
+    link: "https://www.infomoney.com.br/mercados/vale-vale3-avanca-com-alta-do-minerio/",
+    excerpt: {
+      rendered:
+        '<img src="https://www.infomoney.com.br/wp-content/uploads/vale.jpg" alt="Vale" /><p>Ações da mineradora acompanham o bom humor nos mercados asiáticos nesta terça-feira.</p>',
+    },
+  },
+];
 
-export const RSS_XML_WITH_INVALID_ITEMS = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>InfoMoney Inválidos</title>
-    <item>
-      <title></title>
-      <link>https://www.infomoney.com.br/mercados/sem-titulo/</link>
-      <description>Item sem título válido</description>
-    </item>
-    <item>
-      <title>Item sem link</title>
-      <link></link>
-      <description>Descrição de item sem link</description>
-    </item>
-    <item>
-      <title>Item Válido</title>
-      <link>https://www.infomoney.com.br/mercados/item-valido/</link>
-      <description>Descrição válida</description>
-    </item>
-  </channel>
-</rss>`;
+export const POSTS_JSON_WITH_DUPLICATES = [
+  {
+    id: 1,
+    date_gmt: "2026-08-18T13:00:00",
+    title: { rendered: "Notícia 1" },
+    link: "https://www.infomoney.com.br/mercados/noticia-1/",
+    excerpt: { rendered: "Primeira versão" },
+  },
+  {
+    id: 1,
+    date_gmt: "2026-08-18T13:05:00",
+    title: { rendered: "Notícia 1 Repetida" },
+    link: "https://www.infomoney.com.br/mercados/noticia-1/",
+    excerpt: { rendered: "Segunda versão do mesmo id" },
+  },
+  {
+    id: 2,
+    date_gmt: "2026-08-18T13:10:00",
+    title: { rendered: "Notícia 2" },
+    link: "https://www.infomoney.com.br/mercados/noticia-2/",
+    excerpt: { rendered: "Outra notícia distinta" },
+  },
+];
 
-export const EMPTY_RSS_XML = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>InfoMoney Vazio</title>
-    <link>https://www.infomoney.com.br</link>
-    <description>Canal sem itens</description>
-  </channel>
-</rss>`;
+export const POSTS_JSON_WITH_INVALID_ITEMS = [
+  {
+    id: 10,
+    date_gmt: "2026-08-18T13:00:00",
+    title: { rendered: "" },
+    link: "https://www.infomoney.com.br/mercados/sem-titulo/",
+    excerpt: { rendered: "Item sem título válido" },
+  },
+  {
+    id: 11,
+    date_gmt: "2026-08-18T13:00:00",
+    title: { rendered: "Item sem link" },
+    link: "",
+    excerpt: { rendered: "Descrição de item sem link" },
+  },
+  {
+    id: 12,
+    date_gmt: "2026-08-18T13:00:00",
+    title: { rendered: "Item Válido" },
+    link: "https://www.infomoney.com.br/mercados/item-valido/",
+    excerpt: { rendered: "Descrição válida" },
+  },
+];
 
-export const MALFORMED_RSS_XML = `<html><body><h1>502 Bad Gateway</h1><p>Not an RSS feed</p></body></html>`;
+export const EMPTY_POSTS_JSON: unknown[] = [];
+
+export const MALFORMED_POSTS_RESPONSE = {
+  code: "rest_no_route",
+  message: "No route was found matching the URL and request method.",
+};

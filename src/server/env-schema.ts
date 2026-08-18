@@ -100,9 +100,9 @@ export const serverEnvSchema = z
     GEMINI_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
 
     NEWS_PROVIDER: z.literal("infomoney").default("infomoney"),
-    INFOMONEY_RSS_URL: z.url().default("https://www.infomoney.com.br/feed/"),
+    INFOMONEY_API_URL: z.url().default("https://www.infomoney.com.br/wp-json/wp/v2/posts"),
     NEWS_TIMEOUT_MS: z.coerce.number().int().positive().default(5_000),
-    NEWS_MAX_ITEMS: z.coerce.number().int().positive().max(100).default(20),
+    NEWS_MAX_ITEMS: z.coerce.number().int().positive().max(100).default(100),
 
     FEED_TIMEZONE: z.string().trim().min(1).default("America/Sao_Paulo"),
     FEED_REFRESH_COOLDOWN_SECONDS: z.coerce.number().int().nonnegative().default(60),
