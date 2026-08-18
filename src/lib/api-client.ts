@@ -18,13 +18,12 @@ export class ApiError extends Error {
 
 const GENERIC_MESSAGE = "Não foi possível concluir a operação. Tente novamente.";
 
-/** Cliente HTTP das telas. Envia e recebe JSON e normaliza o erro padrão da API. */
-export async function postJson<T>(path: string, body?: unknown): Promise<T> {
+async function requestJson<T>(path: string, method: "POST" | "PUT", body?: unknown): Promise<T> {
   let response: Response;
 
   try {
     response = await fetch(path, {
-      method: "POST",
+      method,
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body ?? {}),
     });
@@ -48,4 +47,13 @@ export async function postJson<T>(path: string, body?: unknown): Promise<T> {
   }
 
   return payload as T;
+}
+
+/** Cliente HTTP das telas. Envia e recebe JSON e normaliza o erro padrão da API. */
+export async function postJson<T>(path: string, body?: unknown): Promise<T> {
+  return requestJson<T>(path, "POST", body);
+}
+
+export async function putJson<T>(path: string, body?: unknown): Promise<T> {
+  return requestJson<T>(path, "PUT", body);
 }

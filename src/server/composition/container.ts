@@ -4,6 +4,7 @@ import { NoopPasswordResetNotifier } from "../adapters/notifications/noop-passwo
 import { NodemailerMailTransport } from "../adapters/notifications/nodemailer-mail-transport";
 import { SmtpPasswordResetNotifier } from "../adapters/notifications/smtp-password-reset-notifier";
 import { DrizzlePasswordResetTokenRepository } from "../adapters/persistence/drizzle/drizzle-password-reset-token-repository";
+import { DrizzlePreferencesRepository } from "../adapters/persistence/drizzle/drizzle-preferences-repository";
 import { DrizzleUserRepository } from "../adapters/persistence/drizzle/drizzle-user-repository";
 import { BcryptjsPasswordHasher } from "../adapters/security/bcryptjs-password-hasher";
 import { JoseJwtService } from "../adapters/security/jose-jwt-service";
@@ -12,10 +13,12 @@ import { parseDurationToSeconds } from "../auth/duration";
 import { createDatabase } from "../db/client";
 import { parseServerEnv, smtpConfigFromEnv, type ServerEnv } from "../env-schema";
 import { AuthService } from "../modules/auth/auth-service";
+import { PreferencesService } from "../modules/preferences/preferences-service";
 import type { PasswordResetNotifier } from "../ports/password-reset-notifier";
 
 export interface Container {
   authService: AuthService;
+  preferencesService: PreferencesService;
   authentication: AuthenticationDependencies;
   sessionCookie: { secure: boolean; maxAgeSeconds: number };
 }
@@ -48,6 +51,8 @@ export function createContainer(env: ServerEnv): Container {
   const accessTokenTtlSeconds = parseDurationToSeconds(env.JWT_EXPIRES_IN);
 
   const userRepository = new DrizzleUserRepository(db);
+  const preferencesRepository = new DrizzlePreferencesRepository(db);
+  const preferencesService = new PreferencesService(preferencesRepository);
   const jwtService = new JoseJwtService({
     secret: env.JWT_SECRET,
     issuer: env.JWT_ISSUER,
@@ -69,6 +74,7 @@ export function createContainer(env: ServerEnv): Container {
 
   return {
     authService,
+    preferencesService,
     authentication: { jwtService, userRepository },
     sessionCookie: {
       secure: env.NODE_ENV === "production",
