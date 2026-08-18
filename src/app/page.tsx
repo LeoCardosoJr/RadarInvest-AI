@@ -29,7 +29,8 @@ export default function Home() {
           </Link>
         </div>
         <p className="mt-8 text-sm text-slate-400">
-          Autenticação disponível. Preferências e feed serão adicionados nas próximas etapas.
+          Curadoria inteligente de notícias, preferências personalizadas e resumos diários por
+          inteligência artificial.
         </p>
       </section>
     </main>

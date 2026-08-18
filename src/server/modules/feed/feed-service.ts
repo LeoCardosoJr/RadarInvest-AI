@@ -110,7 +110,9 @@ export class FeedService {
 
     const { preferences, cacheDate, hash, existing } = context;
 
-    if (existing) {
+    // Cooldown só vale para o mesmo conjunto de interesses; se mudaram, o usuário
+    // precisa poder gerar o resumo novo imediatamente.
+    if (existing && existing.preferencesHash === hash) {
       // Math.max evita cooldown negativo/estendido em caso de dessincronização de relógio.
       const elapsedSeconds = Math.max(0, (Date.now() - existing.generatedAt.getTime()) / 1000);
       const remainingSeconds = this.config.refreshCooldownSeconds - elapsedSeconds;
