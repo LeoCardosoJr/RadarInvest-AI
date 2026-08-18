@@ -306,5 +306,25 @@ describe("FeedService", () => {
       expect(result.generatedAt).toBeNull();
       expect(result.message).toBeTruthy();
     });
+
+    it("ignora cooldown e regenera quando os interesses mudaram desde a última geração", async () => {
+      await withPreferences(preferencesRepository, ["PETR4"]);
+      const firstItem = newsItem({ id: "news-1" });
+      newsProvider.items = [firstItem];
+      aiProvider.result = { items: [{ newsId: firstItem.id, summary: "Resumo PETR4." }] };
+      await service.getFeed(USER_ID);
+
+      // Usuário troca os interesses imediatamente após a geração (ainda dentro do cooldown de 60s).
+      await withPreferences(preferencesRepository, ["VALE3"]);
+      const secondItem = newsItem({ id: "news-2" });
+      newsProvider.items = [secondItem];
+      aiProvider.result = { items: [{ newsId: secondItem.id, summary: "Resumo VALE3." }] };
+
+      const result = await service.refreshFeed(USER_ID);
+
+      expect(result.interests).toEqual(["VALE3"]);
+      expect(result.items[0]?.summary).toBe("Resumo VALE3.");
+      expect(result.cached).toBe(false);
+    });
   });
 });

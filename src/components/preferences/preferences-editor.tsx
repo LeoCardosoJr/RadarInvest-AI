@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 
 import { ApiError, putJson } from "@/lib/api-client";
 import {
@@ -22,9 +22,10 @@ interface PreferencesResponse {
 
 interface PreferencesEditorProps {
   initialPreferences: PreferenceItem[];
+  onUpdated?: (newPreferences: PreferenceItem[]) => void;
 }
 
-export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps) {
+export function PreferencesEditor({ initialPreferences, onUpdated }: PreferencesEditorProps) {
   const [preferences, setPreferences] = useState(initialPreferences);
   const [topic, setTopic] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -32,6 +33,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
     tone: "success" | "error";
     text: string;
   } | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const topicLength = cleanTopicPresentation(topic).length;
 
   async function savePreferences(topics: string[], successMessage: string): Promise<boolean> {
@@ -42,6 +44,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
       const response = await putJson<PreferencesResponse>("/preferences", { topics });
       setPreferences(response.interests);
       setFeedback({ tone: "success", text: successMessage });
+      onUpdated?.(response.interests);
       return true;
     } catch (error) {
       const errorMessage =
@@ -58,6 +61,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
     const cleanTopic = cleanTopicPresentation(topic);
 
     if (!cleanTopic) {
+      inputRef.current?.focus();
       return;
     }
 
@@ -66,6 +70,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
         tone: "error",
         text: `O interesse deve ter no máximo ${MAX_TOPIC_LENGTH} caracteres.`,
       });
+      inputRef.current?.focus();
       return;
     }
 
@@ -87,6 +92,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
         tone: "error",
         text: "Este interesse já está cadastrado.",
       });
+      inputRef.current?.focus();
       return;
     }
 
@@ -96,6 +102,11 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
     if (saved) {
       setTopic("");
     }
+
+    // Devolve o foco ao input para permitir adicionar novos termos consecutivamente
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   }
 
   async function removePreference(id: string, topic: string) {
@@ -124,6 +135,7 @@ export function PreferencesEditor({ initialPreferences }: PreferencesEditorProps
         <div className="flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <input
+              ref={inputRef}
               type="text"
               value={topic}
               onChange={(event) => setTopic(event.target.value)}

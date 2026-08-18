@@ -2,10 +2,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
-import { PreferencesEditor } from "@/components/preferences/preferences-editor";
+import { serializeFeed } from "@/app/feed/route";
 import { authenticateAccessToken } from "@/server/auth/authenticate-request";
 import { SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
 import { getContainer } from "@/server/composition/container";
+import { DashboardView } from "./dashboard-view";
 
 // A sessão é lida a cada request; nada da área autenticada é pré-renderizado.
 export const dynamic = "force-dynamic";
@@ -19,10 +20,26 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [user, preferences] = await Promise.all([
-    container.authentication.userRepository.findPublicById(auth.userId),
-    container.preferencesService.listPreferences(auth.userId),
-  ]);
+  let user;
+  let preferences;
+  let initialFeedResult;
+
+  try {
+    [user, preferences, initialFeedResult] = await Promise.all([
+      container.authentication.userRepository.findPublicById(auth.userId),
+      container.preferencesService.listPreferences(auth.userId),
+      container.feedService.getFeed(auth.userId).catch(() => ({
+        generatedAt: null,
+        interests: [] as readonly string[],
+        items: [],
+        cached: false,
+        stale: false,
+        message: "Não foi possível carregar o feed automaticamente. Use o botão atualizar abaixo.",
+      })),
+    ]);
+  } catch {
+    redirect("/login");
+  }
 
   if (!user) {
     redirect("/login");
@@ -34,6 +51,8 @@ export default async function DashboardPage() {
     createdAt: preference.createdAt.toISOString(),
   }));
 
+  const initialFeed = serializeFeed(initialFeedResult);
+
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-16">
       <header className="flex items-center justify-between gap-4">
@@ -43,16 +62,11 @@ export default async function DashboardPage() {
         <LogoutButton />
       </header>
 
-      <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-950/60 p-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-white">Olá, {user.name}.</h1>
-        <p className="mt-2 text-sm text-slate-400">{user.email}</p>
-        <p className="mt-4 text-sm leading-6 text-slate-300">
-          Gerencie abaixo os interesses e tópicos financeiros que guiarão a curadoria e os resumos
-          diários de notícias gerados por IA.
-        </p>
-      </section>
-
-      <PreferencesEditor initialPreferences={initialPreferences} />
+      <DashboardView
+        user={user}
+        initialPreferences={initialPreferences}
+        initialFeed={initialFeed}
+      />
     </main>
   );
 }
