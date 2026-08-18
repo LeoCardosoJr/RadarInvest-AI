@@ -1,11 +1,16 @@
 import { eq } from "drizzle-orm";
 
+import {
+  cleanTopicPresentation,
+  MAX_PREFERENCES_COUNT,
+  MAX_TOPIC_LENGTH,
+  normalizeTopic,
+} from "../../lib/preferences";
 import type { SeedEnv } from "../env-schema";
 import type { Database } from "./client";
 import { preferences, users } from "./schema";
 
-const MAX_SEED_INTERESTS = 20;
-const MAX_TOPIC_LENGTH = 80;
+export { normalizeTopic };
 
 export interface SeedLogger {
   info(message: string): void;
@@ -21,10 +26,6 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export function normalizeTopic(topic: string): string {
-  return topic.trim().replace(/\s+/g, " ").toLowerCase();
-}
-
 export function parseSeedInterests(source: string): Array<{
   topic: string;
   normalizedTopic: string;
@@ -32,7 +33,7 @@ export function parseSeedInterests(source: string): Array<{
   const uniqueTopics = new Map<string, string>();
 
   for (const rawTopic of source.split(",")) {
-    const topic = rawTopic.trim().replace(/\s+/g, " ");
+    const topic = cleanTopicPresentation(rawTopic);
 
     if (!topic) {
       continue;
@@ -46,8 +47,8 @@ export function parseSeedInterests(source: string): Array<{
     uniqueTopics.set(normalizedTopic, uniqueTopics.get(normalizedTopic) ?? topic);
   }
 
-  if (uniqueTopics.size > MAX_SEED_INTERESTS) {
-    throw new Error(`Seed must contain at most ${MAX_SEED_INTERESTS} interests.`);
+  if (uniqueTopics.size > MAX_PREFERENCES_COUNT) {
+    throw new Error(`Seed must contain at most ${MAX_PREFERENCES_COUNT} interests.`);
   }
 
   return [...uniqueTopics].map(([normalizedTopic, topic]) => ({
