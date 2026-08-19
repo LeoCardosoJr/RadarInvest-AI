@@ -6,17 +6,17 @@ interface FeedCardProps {
 
 export function FeedCard({ item }: FeedCardProps) {
   return (
-    <article className="group flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-900/60 p-5 transition hover:border-slate-700 hover:bg-slate-900/90">
+    <article className="group flex flex-col justify-between rounded border border-zinc-800 bg-zinc-950 p-4 transition hover:border-zinc-700">
       <div>
         <div className="flex items-center justify-between gap-3">
-          <span className="inline-flex items-center rounded-md border border-emerald-900/60 bg-emerald-950/50 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+          <span className="inline-flex items-center rounded-sm border border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft-bg)] px-2 py-0.5 font-mono text-[11px] uppercase tracking-wide text-[color:var(--accent)]">
             {item.source}
           </span>
           <a
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-slate-400 transition hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 rounded"
+            className="inline-flex items-center gap-1 text-xs text-zinc-500 transition hover:text-[color:var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-ring)] rounded"
             aria-label={`Ler notícia completa: ${item.title} (abre em nova aba)`}
           >
             <span>Ver notícia</span>
@@ -41,18 +41,18 @@ export function FeedCard({ item }: FeedCardProps) {
           </a>
         </div>
 
-        <h3 className="mt-3 text-base font-semibold leading-snug tracking-tight text-white group-hover:text-emerald-100">
+        <h3 className="mt-2.5 text-sm font-semibold leading-snug tracking-tight text-zinc-50 group-hover:text-[color:var(--accent-hover)]">
           <a
             href={item.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline focus:outline-none focus:ring-2 focus:ring-emerald-400/40 rounded"
+            className="hover:underline focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-ring)] rounded"
           >
             {item.title}
           </a>
         </h3>
 
-        <p className="mt-2.5 text-sm leading-relaxed text-slate-300">{item.summary}</p>
+        <p className="mt-2 text-sm leading-relaxed text-zinc-400">{item.summary}</p>
       </div>
     </article>
   );

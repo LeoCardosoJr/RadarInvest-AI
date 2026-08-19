@@ -44,3 +44,8 @@ Thumbs.db
 /sdd/
 /AGENTS.md
 /CLAUDE.md
+
+# Local agent tooling config
+/.claude/
+/.playwright-mcp/
+/landing.png

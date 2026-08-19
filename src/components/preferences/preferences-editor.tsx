@@ -118,21 +118,21 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-8">
+    <section className="mt-6 rounded border border-zinc-800 bg-zinc-900 p-5">
       <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-white">Seus Interesses</h2>
-          <p className="mt-1 text-sm text-slate-400">
+          <h2 className="text-base font-semibold tracking-tight text-zinc-50">Seus Interesses</h2>
+          <p className="mt-1 text-sm text-zinc-400">
             Defina ativos, setores ou temas para personalizar seu resumo de notícias.
           </p>
         </div>
-        <span className="self-start rounded-full border border-slate-800 bg-slate-900 px-3 py-1 text-xs font-medium text-slate-400 sm:self-auto">
-          {preferences.length} / {MAX_PREFERENCES_COUNT} interesses
+        <span className="self-start rounded-sm border border-zinc-800 bg-zinc-950 px-2 py-1 font-mono text-xs text-zinc-400 sm:self-auto">
+          {preferences.length}/{MAX_PREFERENCES_COUNT}
         </span>
       </div>
 
-      <form onSubmit={addPreference} className="mt-6">
-        <div className="flex flex-col gap-3 sm:flex-row">
+      <form onSubmit={addPreference} className="mt-5">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <input
               ref={inputRef}
@@ -141,10 +141,10 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
               onChange={(event) => setTopic(event.target.value)}
               disabled={isSaving || preferences.length >= MAX_PREFERENCES_COUNT}
               placeholder="Ex.: PETR4, VALE3, Selic, setor bancário..."
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 disabled:cursor-not-allowed disabled:bg-slate-800/50"
+              className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-ring)] disabled:cursor-not-allowed disabled:bg-zinc-900"
             />
             {topic.length > 0 && (
-              <span className="absolute right-3 top-2.5 text-xs text-slate-500">
+              <span className="absolute right-3 top-2.5 font-mono text-xs text-zinc-600">
                 {topicLength}/{MAX_TOPIC_LENGTH}
               </span>
             )}
@@ -152,7 +152,7 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
           <button
             type="submit"
             disabled={isSaving || !topic.trim() || preferences.length >= MAX_PREFERENCES_COUNT}
-            className="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+            className="inline-flex items-center justify-center rounded bg-[color:var(--accent-solid)] px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-[color:var(--accent-solid-hover)] disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
           >
             {isSaving ? "Salvando…" : "Adicionar"}
           </button>
@@ -162,30 +162,30 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
       {feedback && (
         <p
           role={feedback.tone === "error" ? "alert" : "status"}
-          className={`mt-4 rounded-lg border px-3.5 py-2 text-sm ${
+          className={`mt-3 rounded border px-3 py-1.5 text-sm ${
             feedback.tone === "error"
-              ? "border-red-900/60 bg-red-950/40 text-red-200"
-              : "border-emerald-900/60 bg-emerald-950/40 text-emerald-200"
+              ? "border-red-900/60 bg-red-950/40 text-red-300"
+              : "border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft-bg)] text-[color:var(--accent-hover)]"
           }`}
         >
           {feedback.text}
         </p>
       )}
 
-      <div className="mt-6">
+      <div className="mt-5">
         {preferences.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-6 text-center">
-            <p className="text-sm text-slate-400">Nenhum interesse cadastrado no momento.</p>
-            <p className="mt-1 text-xs text-slate-500">
+          <div className="rounded border border-dashed border-zinc-800 bg-zinc-950 p-5 text-center">
+            <p className="text-sm text-zinc-400">Nenhum interesse cadastrado no momento.</p>
+            <p className="mt-1 text-xs text-zinc-600">
               Adicione tópicos como ações, commodities ou indicadores macroeconômicos acima.
             </p>
           </div>
         ) : (
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-1.5">
             {preferences.map((preference) => (
               <li
                 key={preference.id}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-sm font-medium text-slate-200"
+                className="inline-flex items-center gap-2 rounded-sm border border-zinc-700 bg-zinc-950 px-2.5 py-1 text-sm text-zinc-200"
               >
                 <span>{preference.topic}</span>
                 <button
@@ -193,7 +193,7 @@ export function PreferencesEditor({ initialPreferences, onUpdated }: Preferences
                   onClick={() => removePreference(preference.id, preference.topic)}
                   disabled={isSaving}
                   aria-label={`Remover interesse ${preference.topic}`}
-                  className="rounded-md text-slate-400 transition hover:bg-slate-800 hover:text-red-300 disabled:cursor-not-allowed"
+                  className="rounded-sm text-zinc-500 transition hover:bg-zinc-800 hover:text-red-400 disabled:cursor-not-allowed"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

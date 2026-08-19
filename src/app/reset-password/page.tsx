@@ -84,12 +84,12 @@ export default function ResetPasswordPage() {
       title="Definir nova senha"
       description="Escolha uma nova senha. O link é de uso único e encerra as sessões abertas anteriormente."
       footer={
-        <Link href="/forgot-password" className="font-semibold text-emerald-300">
+        <Link href="/forgot-password" className="font-semibold text-[color:var(--accent-hover)]">
           Solicitar novo link
         </Link>
       }
     >
-      <Suspense fallback={<p className="text-sm text-slate-400">Carregando…</p>}>
+      <Suspense fallback={<p className="text-sm text-zinc-400">Carregando…</p>}>
         <ResetPasswordForm />
       </Suspense>
     </AuthCard>

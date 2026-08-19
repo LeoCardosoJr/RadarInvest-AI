@@ -52,10 +52,10 @@ export function DashboardView({ user, initialPreferences, initialFeed }: Dashboa
 
   return (
     <>
-      <section className="mt-12 rounded-2xl border border-slate-800 bg-slate-950/60 p-8">
-        <h1 className="text-3xl font-semibold tracking-tight text-white">Olá, {user.name}.</h1>
-        <p className="mt-2 text-sm text-slate-400">{user.email}</p>
-        <p className="mt-4 text-sm leading-6 text-slate-300">
+      <section className="mt-8 rounded border border-zinc-800 bg-zinc-900 p-5">
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-50">Olá, {user.name}.</h1>
+        <p className="mt-1 font-mono text-xs text-zinc-500">{user.email}</p>
+        <p className="mt-3 text-sm leading-6 text-zinc-400">
           Gerencie abaixo os interesses e tópicos financeiros que guiarão a curadoria e os resumos
           de notícias gerados por IA.
         </p>
