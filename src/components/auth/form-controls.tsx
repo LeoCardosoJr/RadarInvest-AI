@@ -7,18 +7,18 @@ export function TextField({
   ...inputProps
 }: { label: string; id: string; hint?: string } & InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <div className="mb-5">
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-slate-200">
+    <div className="mb-4">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-zinc-300">
         {label}
       </label>
       <input
         id={id}
         {...inputProps}
         aria-describedby={hint ? `${id}-hint` : undefined}
-        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30"
+        className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent-ring)]"
       />
       {hint ? (
-        <p id={`${id}-hint`} className="mt-2 text-xs text-slate-500">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs text-zinc-500">
           {hint}
         </p>
       ) : null}
@@ -39,7 +39,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={pending || disabled}
-      className="w-full rounded-lg bg-emerald-500 px-4 py-2.5 font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+      className="w-full rounded bg-[color:var(--accent-solid)] px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-[color:var(--accent-solid-hover)] disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
     >
       {pending ? "Aguarde…" : children}
     </button>
@@ -49,11 +49,11 @@ export function SubmitButton({
 export function FormMessage({ tone, children }: { tone: "error" | "success"; children: string }) {
   const toneClasses =
     tone === "error"
-      ? "border-red-900/60 bg-red-950/40 text-red-200"
-      : "border-emerald-900/60 bg-emerald-950/40 text-emerald-200";
+      ? "border-red-900/60 bg-red-950/40 text-red-300"
+      : "border-[color:var(--accent-soft-border)] bg-[color:var(--accent-soft-bg)] text-[color:var(--accent-hover)]";
 
   return (
-    <p role="status" className={`mb-5 rounded-lg border px-3 py-2 text-sm ${toneClasses}`}>
+    <p role="status" className={`mb-4 rounded border px-3 py-2 text-sm ${toneClasses}`}>
       {children}
     </p>
   );

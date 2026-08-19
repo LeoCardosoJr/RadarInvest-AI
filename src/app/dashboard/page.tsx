@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { Wordmark } from "@/components/brand/wordmark";
 import { serializeFeed } from "@/app/feed/route";
 import { authenticateAccessToken } from "@/server/auth/authenticate-request";
 import { SESSION_COOKIE_NAME } from "@/server/auth/session-cookie";
@@ -54,11 +55,9 @@ export default async function DashboardPage() {
   const initialFeed = serializeFeed(initialFeedResult);
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-16">
-      <header className="flex items-center justify-between gap-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300">
-          RadarInvest AI
-        </p>
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-12">
+      <header className="flex items-center justify-between gap-4 border-b border-zinc-900 pb-4">
+        <Wordmark />
         <LogoutButton />
       </header>
 

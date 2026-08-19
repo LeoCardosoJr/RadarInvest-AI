@@ -46,7 +46,7 @@ export default function RegisterPage() {
       footer={
         <>
           Já tem conta?{" "}
-          <Link href="/login" className="font-semibold text-emerald-300">
+          <Link href="/login" className="font-semibold text-[color:var(--accent-hover)]">
             Entrar
           </Link>
         </>

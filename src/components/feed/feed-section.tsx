@@ -81,32 +81,32 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
   return (
     <section
       aria-labelledby="feed-heading"
-      className="mt-8 rounded-2xl border border-slate-800 bg-slate-950/60 p-8"
+      className="mt-6 rounded border border-zinc-800 bg-zinc-900 p-5"
     >
       {/* Cabeçalho do Feed */}
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 id="feed-heading" className="text-xl font-semibold tracking-tight text-white">
+            <h2 id="feed-heading" className="text-base font-semibold tracking-tight text-zinc-50">
               Seu Feed
             </h2>
             {feed.cached && !feed.stale && (
-              <span className="rounded-full border border-slate-700 bg-slate-900 px-2.5 py-0.5 text-xs font-medium text-slate-400">
+              <span className="rounded-sm border border-zinc-700 bg-zinc-950 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-wide text-zinc-400">
                 Em cache
               </span>
             )}
             {feed.stale && (
-              <span className="rounded-full border border-amber-800/80 bg-amber-950/60 px-2.5 py-0.5 text-xs font-medium text-amber-300">
+              <span className="rounded-sm border border-orange-800/70 bg-orange-950/40 px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-wide text-orange-300">
                 Modo contingência
               </span>
             )}
           </div>
           {formattedDate ? (
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 font-mono text-xs text-zinc-500">
               Última geração: <time dateTime={feed.generatedAt ?? undefined}>{formattedDate}</time>
             </p>
           ) : (
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-zinc-400">
               Resumo inteligente das últimas notícias do mercado.
             </p>
           )}
@@ -118,12 +118,12 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
             onClick={handleRefresh}
             disabled={isRefreshing || cooldownSeconds > 0}
             aria-busy={isRefreshing}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-emerald-400 hover:text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400/40 disabled:cursor-not-allowed disabled:border-slate-800 disabled:bg-slate-900/50 disabled:text-slate-500"
+            className="inline-flex items-center justify-center gap-2 rounded border border-zinc-700 bg-zinc-950 px-3 py-1.5 text-sm font-semibold text-zinc-300 transition hover:border-[color:var(--accent)] hover:text-[color:var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[color:var(--accent-ring)] disabled:cursor-not-allowed disabled:border-zinc-800 disabled:bg-zinc-900 disabled:text-zinc-600"
           >
             {isRefreshing ? (
               <>
                 <svg
-                  className="h-4 w-4 animate-spin text-emerald-400"
+                  className="h-4 w-4 animate-spin text-[color:var(--accent)]"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -146,7 +146,7 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
                 <span>Gerando resumo…</span>
               </>
             ) : cooldownSeconds > 0 ? (
-              <span>Aguarde {cooldownSeconds}s</span>
+              <span className="font-mono">Aguarde {cooldownSeconds}s</span>
             ) : (
               <>
                 <svg
@@ -173,14 +173,14 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
       {feed.warning && (
         <div
           role="status"
-          className="mt-6 rounded-lg border border-amber-900/60 bg-amber-950/30 p-4 text-sm text-amber-200"
+          className="mt-5 rounded border border-orange-900/60 bg-orange-950/20 p-3 text-sm text-orange-200"
         >
           <div className="flex items-start gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
-              className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-400"
+              className="mt-0.5 h-4 w-4 flex-shrink-0 text-orange-400"
               aria-hidden="true"
             >
               <path
@@ -198,13 +198,13 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
       {errorMessage && (
         <div
           role="alert"
-          className="mt-6 flex flex-col gap-3 rounded-lg border border-red-900/60 bg-red-950/40 p-4 sm:flex-row sm:items-center sm:justify-between"
+          className="mt-5 flex flex-col gap-3 rounded border border-red-900/60 bg-red-950/30 p-3 sm:flex-row sm:items-center sm:justify-between"
         >
-          <p className="text-sm text-red-200">{errorMessage}</p>
+          <p className="text-sm text-red-300">{errorMessage}</p>
           <button
             type="button"
             onClick={handleReload}
-            className="self-start rounded-md bg-red-900/80 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-800 sm:self-auto"
+            className="self-start rounded-sm bg-red-900/80 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-red-800 sm:self-auto"
           >
             Tentar novamente
           </button>
@@ -212,27 +212,27 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
       )}
 
       {/* Conteúdo do Feed */}
-      <div className="mt-6">
+      <div className="mt-5">
         {!hasPreferences ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center">
-            <h3 className="text-base font-semibold text-slate-200">Nenhum interesse cadastrado</h3>
-            <p className="mt-2 text-sm text-slate-400">
+          <div className="rounded border border-dashed border-zinc-800 bg-zinc-950 p-6 text-center">
+            <h3 className="text-sm font-semibold text-zinc-200">Nenhum interesse cadastrado</h3>
+            <p className="mt-1.5 text-sm text-zinc-500">
               Adicione tópicos ou ativos na seção de interesses acima para que a inteligência
               artificial possa gerar seu resumo personalizado.
             </p>
           </div>
         ) : !hasItems ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center">
-            <h3 className="text-base font-semibold text-slate-200">
+          <div className="rounded border border-dashed border-zinc-800 bg-zinc-950 p-6 text-center">
+            <h3 className="text-sm font-semibold text-zinc-200">
               Nenhuma notícia relevante encontrada hoje
             </h3>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-1.5 text-sm text-zinc-500">
               {feed.message ??
                 "Nenhum artigo recente do InfoMoney coincidiu diretamente com os seus interesses cadastrados. Experimente adicionar tópicos mais amplos ou atualizar mais tarde."}
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-1">
+          <div className="grid gap-3 sm:grid-cols-1">
             {feed.items.map((item, index) => (
               <FeedCard key={`${item.url}-${index}`} item={item} />
             ))}
@@ -241,9 +241,9 @@ export function FeedSection({ feed, onFeedChange, preferencesCount }: FeedSectio
       </div>
 
       {/* Aviso legal de não recomendação de investimento */}
-      <footer className="mt-8 border-t border-slate-900 pt-6">
-        <p className="text-xs leading-relaxed text-slate-400">
-          <strong className="font-semibold text-slate-300">Aviso:</strong> Os resumos apresentados
+      <footer className="mt-6 border-t border-zinc-900 pt-4">
+        <p className="text-xs leading-relaxed text-zinc-500">
+          <strong className="font-semibold text-zinc-400">Aviso:</strong> Os resumos apresentados
           são gerados por inteligência artificial com base em notícias públicas e possuem caráter
           estritamente informativo. Não constituem recomendação, consultoria ou análise de
           investimento para compra ou venda de quaisquer ativos financeiros.

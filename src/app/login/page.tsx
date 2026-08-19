@@ -41,7 +41,7 @@ export default function LoginPage() {
       footer={
         <>
           Ainda não tem conta?{" "}
-          <Link href="/register" className="font-semibold text-emerald-300">
+          <Link href="/register" className="font-semibold text-[color:var(--accent-hover)]">
             Criar conta
           </Link>
         </>
@@ -68,7 +68,10 @@ export default function LoginPage() {
         <SubmitButton pending={pending}>Entrar</SubmitButton>
       </form>
       <p className="mt-5 text-center text-sm">
-        <Link href="/forgot-password" className="text-slate-400 hover:text-emerald-300">
+        <Link
+          href="/forgot-password"
+          className="text-zinc-400 hover:text-[color:var(--accent-hover)]"
+        >
           Esqueci minha senha
         </Link>
       </p>

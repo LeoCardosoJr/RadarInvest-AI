@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
       title="Recuperar senha"
       description="Informe o e-mail da conta. Se ele estiver cadastrado, enviaremos um link de uso único."
       footer={
-        <Link href="/login" className="font-semibold text-emerald-300">
+        <Link href="/login" className="font-semibold text-[color:var(--accent-hover)]">
           Voltar para o login
         </Link>
       }
